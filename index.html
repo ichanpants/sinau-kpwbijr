@@ -401,34 +401,17 @@ footer {
       <button class="btn-sec" onclick="closeLogin()">Batal</button>
       <button class="btn-pri" onclick="doLogin()">Masuk →</button>
     </div>
-    <div style="text-align:center;margin-top:14px;">
-      <span style="font-size:11px;color:#9CA3AF;cursor:pointer;" onclick="closeLogin();showConfig();">Admin? Klik di sini</span>
-    </div>
   </div>
 </div>
 
-<!-- MODAL ADMIN CONFIG -->
-<div class="modal-overlay" id="modal-config">
-  <div class="modal">
-    <h3>🔧 Mode Admin</h3>
-    <p>Pengaturan URL database. Hanya perlu diisi sekali oleh admin — tersimpan di browser ini.</p>
-    <label>URL Google Sheets — Tab LEADERBOARD (CSV)</label>
-    <input type="text" id="input-lb-url" placeholder="https://docs.google.com/spreadsheets/d/.../pub?...&output=csv">
-    <label>URL Google Sheets — Tab DATA_MATERI (CSV)</label>
-    <input type="text" id="input-materi-url" placeholder="https://docs.google.com/spreadsheets/d/.../pub?...&output=csv">
-    <div class="modal-footer">
-      <button class="btn-sec" onclick="closeConfig()">Batal</button>
-      <button class="btn-pri" onclick="saveConfig()">Simpan & Muat Data</button>
-    </div>
-  </div>
-</div>
+
 
 <script>
 // ── CONFIG & STATE ──
 let CFG = {
   userId:    localStorage.getItem('sinau_userid') || '',
-  lbUrl:     localStorage.getItem('sinau_lb_url') || '',
-  materiUrl: localStorage.getItem('sinau_materi_url') || '',
+  lbUrl:     'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5jH8H8qKrnODO7fPnJxNvA1yFAWGJO3yQkzI9ktgRneCgnSEy8iK3tCM0pyRYmw/pub?gid=1299642079&single=true&output=csv',
+  materiUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5jH8H8qKrnODO7fPnJxNvA1yFAWGJO3yQkzI9ktgRneCgnSEy8iK3tCM0pyRYmw/pub?gid=435179716&single=true&output=csv',
 };
 
 // Warna avatar
@@ -463,22 +446,7 @@ async function doLogin() {
   renderNav(nama);
 }
 
-// ── MODAL ADMIN CONFIG ──
-function showConfig() {
-  document.getElementById('input-lb-url').value    = CFG.lbUrl;
-  document.getElementById('input-materi-url').value = CFG.materiUrl;
-  document.getElementById('modal-config').classList.add('open');
-}
-function closeConfig() { document.getElementById('modal-config').classList.remove('open'); }
-function saveConfig() {
-  CFG.lbUrl     = document.getElementById('input-lb-url').value.trim();
-  CFG.materiUrl = document.getElementById('input-materi-url').value.trim();
-  localStorage.setItem('sinau_lb_url',     CFG.lbUrl);
-  localStorage.setItem('sinau_materi_url', CFG.materiUrl);
-  closeConfig();
-  toast('Konfigurasi disimpan! Memuat data...');
-  loadAll();
-}
+
 
 // ── TOAST ──
 function toast(msg, dur=3000) {
@@ -668,9 +636,6 @@ function showUploadInfo() {
 
 // ── LOAD ALL ──
 async function loadAll() {
-  if (!CFG.lbUrl && !CFG.materiUrl) {
-    showConfig();
-    return;
   }
   const [lbRows, materiRows] = await Promise.all([
     fetchCSV(CFG.lbUrl),
@@ -687,16 +652,9 @@ async function loadAll() {
 }
 
 // ── INIT ──
-if (!CFG.lbUrl) {
-  renderNav('');
-  document.getElementById('materi-list').innerHTML = '<div class="loading" style="border:1.5px dashed #E5E7EB;border-radius:12px;padding:2rem;color:#6B7280;font-size:13px;">👋 Hubungi admin untuk setup SINAU</div>';
-  document.getElementById('lb-list').innerHTML = '<div class="lb-empty">Belum dikonfigurasi 👆</div>';
-  setTimeout(showConfig, 600);
-} else {
-  loadAll();
-  if (!CFG.userId) {
-    setTimeout(showLogin, 800);
-  }
+loadAll();
+if (!CFG.userId) {
+  setTimeout(showLogin, 800);
 }
 </script>
 </body>
