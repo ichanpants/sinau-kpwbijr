@@ -487,19 +487,23 @@ function renderNav(nama) {
 }
 
 // ── RENDER LEADERBOARD ──
+function getCol(row, ...keys) {
+  for (const k of keys) { if (row[k] !== undefined && row[k] !== '') return row[k]; }
+  return '';
+}
 function renderLB(rows) {
   const el = document.getElementById('lb-list');
   if (!rows.length) { el.innerHTML = '<div class="lb-empty">Belum ada data</div>'; return; }
-  const sorted = [...rows].sort((a,b) => Number(b['Total Poin']||b['TOTAL_POIN']||0) - Number(a['Total Poin']||a['TOTAL_POIN']||0));
+  const sorted = [...rows].sort((a,b) => Number(getCol(b,'Total Poin','TOTAL_POIN')||0) - Number(getCol(a,'Total Poin','TOTAL_POIN')||0));
   const medals = ['🥇','🥈','🥉'];
   el.innerHTML = sorted.slice(0,8).map((r,i) => {
-    const nama  = r['Nama']||r['NAMA']||'-';
-    const unit  = r['Unit']||r['UNIT']||'';
-    const poin  = r['Total Poin']||r['TOTAL_POIN']||0;
-    const bg    = colorFor(nama);
+    const nama  = getCol(r,'Nama','NAMA') || '-';
+    const unit  = getCol(r,'Unit','UNIT') || '';
+    const poin  = getCol(r,'Total Poin','TOTAL_POIN') || 0;
+    const bg    = nama !== '-' ? colorFor(nama) : '#9CA3AF';
     return `<div class="lb-row">
       <span class="lb-rank">${medals[i]||i+1}</span>
-      <div class="lb-avatar" style="background:${bg}">${initials(nama)}</div>
+      <div class="lb-avatar" style="background:${bg}">${nama !== '-' ? initials(nama) : '?'}</div>
       <div class="lb-info"><div class="lb-name">${nama}</div><div class="lb-unit">${unit}</div></div>
       <div class="lb-poin">${poin}</div>
     </div>`;
@@ -557,15 +561,15 @@ function renderProgress(lbRows) {
     el.innerHTML = '<div class="lb-empty" style="font-size:12px;">Klik nama di pojok kanan atas untuk login</div>';
     return;
   }
-  const me = lbRows.find(r => (r['ID User']||r['ID_USER']||'').toUpperCase() === CFG.userId);
+  const me = lbRows.find(r => (getCol(r,'ID User','ID_USER')||'').toUpperCase() === CFG.userId);
   if (!me) { el.innerHTML = '<div class="lb-empty" style="font-size:12px;">User tidak ditemukan. Cek ID kamu.</div>'; return; }
 
-  const nama       = me['Nama']||me['NAMA']||CFG.userId;
-  const poinKuis   = Number(me['Poin Kuis']||me['POIN_KUIS']||0);
-  const poinKontrib= Number(me['Poin Kontrib.']||me['POIN_KONTRIB']||0);
-  const totalPoin  = Number(me['Total Poin']||me['TOTAL_POIN']||0);
-  const kuisIkut   = Number(me['Kuis Diikuti']||me['KUIS_DIIKUTI']||0);
-  const materiUp   = Number(me['Materi Upload']||me['MATERI_UPLOAD']||0);
+  const nama       = getCol(me,'Nama','NAMA') || CFG.userId;
+  const poinKuis   = Number(getCol(me,'Poin Kuis','POIN_KUIS') || 0);
+  const poinKontrib= Number(getCol(me,'Poin Kontrib.','Poin Kontrib','POIN_KONTRIB') || 0);
+  const totalPoin  = Number(getCol(me,'Total Poin','TOTAL_POIN') || 0);
+  const kuisIkut   = Number(getCol(me,'Kuis Diikuti','KUIS_DIIKUTI') || 0);
+  const materiUp   = Number(getCol(me,'Materi Upload','MATERI_UPLOAD') || 0);
 
   renderNav(nama);
 
@@ -591,8 +595,8 @@ function renderProgress(lbRows) {
 
 // ── RENDER STATS HERO ──
 function renderStats(lbRows, materiRows) {
-  const totalPoin = lbRows.reduce((s,r)=>s+Number(r['Total Poin']||r['TOTAL_POIN']||0),0);
-  const kuisTotal = lbRows.reduce((s,r)=>s+Number(r['Kuis Diikuti']||r['KUIS_DIIKUTI']||0),0);
+  const totalPoin = lbRows.reduce((s,r)=>s+Number(getCol(r,'Total Poin','TOTAL_POIN')||0),0);
+  const kuisTotal = lbRows.reduce((s,r)=>s+Number(getCol(r,'Kuis Diikuti','KUIS_DIIKUTI')||0),0);
   document.getElementById('stat-user').textContent   = lbRows.length || '—';
   document.getElementById('stat-materi').textContent = materiRows.length || '—';
   document.getElementById('stat-kuis').textContent   = kuisTotal || '—';
@@ -619,8 +623,8 @@ async function loadAll() {
   renderStats(lbRows, materiRows);
   renderProgress(lbRows);
   if (CFG.userId) {
-    const me = lbRows.find(r=>(r['ID User']||r['ID_USER']||'').toUpperCase()===CFG.userId);
-    if (me) renderNav(me['Nama']||me['NAMA']||CFG.userId);
+    const me = lbRows.find(r=>(getCol(r,'ID User','ID_USER')||'').toUpperCase()===CFG.userId);
+    if (me) renderNav(getCol(me,'Nama','NAMA')||CFG.userId);
   }
 }
 
