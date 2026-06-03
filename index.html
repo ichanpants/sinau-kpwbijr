@@ -539,22 +539,41 @@ function renderLB(rows) {
 // ── RENDER MATERI ──
 function renderMateri(rows) {
   const el = document.getElementById('materi-list');
-  if (!rows.length) {
+  // Filter baris kosong
+  const validRows = rows.filter(r => {
+    const vals = Object.values(r);
+    return vals.some(v => v && v.trim() && v !== '-');
+  });
+  if (!validRows.length) {
     el.innerHTML = '<div class="loading" style="border:1.5px dashed #E5E7EB;border-radius:12px;padding:2rem;">Belum ada materi. Jadilah yang pertama upload! 🎉</div>';
     return;
   }
-  const tagColors = {'UIKSPPSPPUR':'tag-green','UMKM & SP':'tag-blue'};
-  el.innerHTML = rows.map(r => {
-    const judul   = r['Judul Materi']||r['JUDUL']||'-';
-    const uploader= r['Uploader (ID)']||r['UPLOADER']||'-';
-    const unit    = r['Unit Kerja']||r['UNIT']||'';
-    const jenis   = r['Jenis File']||r['JENIS']||'';
-    const tgl     = r['Tgl Upload']||r['TGL']||'';
-    const linkFile= r['Link File (Drive)']||r['LINK_FILE']||'';
-    const linkKuis= r['Link Kuis (Form)']||r['LINK_KUIS']||'';
-    const tagCls  = tagColors[unit]||'tag-amber';
-    const hasKuis = linkKuis && !linkKuis.includes('forms.google.com/...');
-    const hasFile = linkFile && !linkFile.includes('drive.google.com/...');
+  const tagColors = {'UIKSP':'tag-green','UPUR':'tag-blue','UIKSPPSPPUR':'tag-green','UMKM & SP':'tag-blue'};
+  el.innerHTML = validRows.map(r => {
+    // Baca by nama kolom dengan fallback ke index (posisi)
+    const vals = Object.values(r);
+    const keys = Object.keys(r);
+    const get = (...names) => {
+      for (const n of names) {
+        // Coba exact match
+        if (r[n] !== undefined && r[n].trim()) return r[n].trim();
+        // Coba case-insensitive & trim
+        const k = keys.find(k => k.trim().toLowerCase() === n.toLowerCase());
+        if (k && r[k] && r[k].trim()) return r[k].trim();
+      }
+      return '';
+    };
+    // Fallback ke index kalau nama kolom tidak ketemu
+    const judul    = get('Judul Materi','JUDUL','judul materi') || vals[1] || '-';
+    const uploader = get('Uploader (ID)','UPLOADER','uploader') || vals[2] || '-';
+    const unit     = get('Unit Kerja','UNIT','unit kerja') || vals[3] || '';
+    const jenis    = get('Jenis File','JENIS','jenis file') || vals[4] || '';
+    const linkFile = get('Link File (Drive)','LINK_FILE','link file') || vals[5] || '';
+    const linkKuis = get('Link Kuis (Form)','LINK_KUIS','link kuis') || vals[6] || '';
+    const tgl      = get('Tgl Upload','TGL','tgl upload') || vals[7] || '';
+    const tagCls   = tagColors[unit] || 'tag-amber';
+    const hasKuis  = linkKuis && linkKuis.startsWith('http') && !linkKuis.includes('...');
+    const hasFile  = linkFile && linkFile.startsWith('http') && !linkFile.includes('...');
     return `<div class="materi-card">
       <div class="materi-head">
         <div>
