@@ -565,12 +565,12 @@ function renderMateri(rows) {
     };
     // Fallback ke index kalau nama kolom tidak ketemu
     const judul    = get('Judul Materi','JUDUL','judul materi') || vals[1] || '-';
-    const uploader = get('Uploader (ID)','UPLOADER','uploader') || vals[2] || '-';
-    const unit     = get('Unit Kerja','UNIT','unit kerja') || vals[3] || '';
-    const jenis    = get('Jenis File','JENIS','jenis file') || vals[4] || '';
-    const linkFile = get('Link File (Drive)','LINK_FILE','link file') || vals[5] || '';
-    const linkKuis = get('Link Kuis (Form)','LINK_KUIS','link kuis') || vals[6] || '';
-    const tgl      = get('Tgl Upload','TGL','tgl upload') || vals[7] || '';
+    const uploader = get('Uploader (ID)','UPLOADER','uploader') || vals[3] || '-';
+    const unit     = get('Unit Kerja','UNIT','unit kerja') || vals[4] || '';
+    const jenis    = get('Jenis File','JENIS','jenis file') || vals[5] || '';
+    const linkFile = get('Link File (Drive)','LINK_FILE','link file') || vals[6] || '';
+    const linkKuis = get('Link Kuis (Form)','LINK_KUIS','link kuis') || vals[7] || '';
+    const tgl      = get('Tgl Upload','TGL','tgl upload') || vals[8] || '';
     const tagCls   = tagColors[unit] || 'tag-amber';
     const hasKuis  = linkKuis && linkKuis.startsWith('http') && !linkKuis.includes('...');
     const hasFile  = linkFile && linkFile.startsWith('http') && !linkFile.includes('...');
