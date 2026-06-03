@@ -302,8 +302,8 @@ footer {
     <a href="#leaderboard">Leaderboard</a>
   </div>
   <div class="nav-user">
-    <div class="avatar" id="nav-avatar" onclick="showConfig()">?</div>
-    <span id="nav-name" style="font-size:13px;font-weight:500;cursor:pointer" onclick="showConfig()">Belum login</span>
+    <div class="avatar" id="nav-avatar" onclick="showLogin()">?</div>
+    <span id="nav-name" style="font-size:13px;font-weight:500;cursor:pointer" onclick="showLogin()">Masuk / Login</span>
   </div>
 </nav>
 
@@ -389,16 +389,33 @@ footer {
 <div id="toast"></div>
 
 <!-- MODAL KONFIGURASI (login user + sheets URL) -->
+<!-- MODAL LOGIN USER -->
+<div class="modal-overlay" id="modal-login">
+  <div class="modal">
+    <h3>👋 Masuk ke SINAU</h3>
+    <p>Masukkan NIP kamu untuk mulai belajar dan melihat progres kamu.</p>
+    <label>NIP kamu</label>
+    <input type="text" id="input-nip" placeholder="contoh: 17241" maxlength="10" style="font-size:18px;font-weight:600;letter-spacing:2px;">
+    <div id="login-error" style="font-size:12px;color:#DC2626;margin-top:-10px;margin-bottom:10px;display:none;">NIP tidak ditemukan. Hubungi admin.</div>
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="closeLogin()">Batal</button>
+      <button class="btn-pri" onclick="doLogin()">Masuk →</button>
+    </div>
+    <div style="text-align:center;margin-top:14px;">
+      <span style="font-size:11px;color:#9CA3AF;cursor:pointer;" onclick="closeLogin();showConfig();">Admin? Klik di sini</span>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADMIN CONFIG -->
 <div class="modal-overlay" id="modal-config">
   <div class="modal">
-    <h3>⚙️ Konfigurasi SINAU</h3>
-    <p>Masukkan ID User kamu dan URL Google Sheets SINAU yang sudah dipublish sebagai CSV. Pengaturan ini tersimpan di browser kamu.</p>
-    <label>ID User kamu (contoh: IK001)</label>
-    <input type="text" id="input-userid" placeholder="IK001" maxlength="10">
+    <h3>🔧 Mode Admin</h3>
+    <p>Pengaturan URL database. Hanya perlu diisi sekali oleh admin — tersimpan di browser ini.</p>
     <label>URL Google Sheets — Tab LEADERBOARD (CSV)</label>
-    <input type="text" id="input-lb-url" placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv&gid=...">
+    <input type="text" id="input-lb-url" placeholder="https://docs.google.com/spreadsheets/d/.../pub?...&output=csv">
     <label>URL Google Sheets — Tab DATA_MATERI (CSV)</label>
-    <input type="text" id="input-materi-url" placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv&gid=...">
+    <input type="text" id="input-materi-url" placeholder="https://docs.google.com/spreadsheets/d/.../pub?...&output=csv">
     <div class="modal-footer">
       <button class="btn-sec" onclick="closeConfig()">Batal</button>
       <button class="btn-pri" onclick="saveConfig()">Simpan & Muat Data</button>
@@ -420,19 +437,43 @@ function colorFor(str) { let h=0; for(let c of str) h=(h*31+c.charCodeAt(0))%COL
 function initials(name) { return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
 
 // ── MODAL CONFIG ──
+// ── MODAL LOGIN ──
+function showLogin() {
+  document.getElementById('input-nip').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('modal-login').classList.add('open');
+}
+function closeLogin() { document.getElementById('modal-login').classList.remove('open'); }
+async function doLogin() {
+  const nip = document.getElementById('input-nip').value.trim();
+  if (!nip) return;
+  // Cek apakah NIP ada di leaderboard
+  const rows = await fetchCSV(CFG.lbUrl);
+  const found = rows.find(r => (getCol(r,'ID User','ID_USER')||'').toString().trim() === nip);
+  if (!found) {
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+  CFG.userId = nip;
+  localStorage.setItem('sinau_userid', nip);
+  closeLogin();
+  toast('Selamat datang, ' + (getCol(found,'Nama','NAMA')||nip) + '! 👋');
+  renderProgress(rows);
+  const nama = getCol(found,'Nama','NAMA')||nip;
+  renderNav(nama);
+}
+
+// ── MODAL ADMIN CONFIG ──
 function showConfig() {
-  document.getElementById('input-userid').value   = CFG.userId;
-  document.getElementById('input-lb-url').value   = CFG.lbUrl;
+  document.getElementById('input-lb-url').value    = CFG.lbUrl;
   document.getElementById('input-materi-url').value = CFG.materiUrl;
   document.getElementById('modal-config').classList.add('open');
 }
 function closeConfig() { document.getElementById('modal-config').classList.remove('open'); }
 function saveConfig() {
-  CFG.userId    = document.getElementById('input-userid').value.trim().toUpperCase();
   CFG.lbUrl     = document.getElementById('input-lb-url').value.trim();
   CFG.materiUrl = document.getElementById('input-materi-url').value.trim();
-  localStorage.setItem('sinau_userid',    CFG.userId);
-  localStorage.setItem('sinau_lb_url',    CFG.lbUrl);
+  localStorage.setItem('sinau_lb_url',     CFG.lbUrl);
   localStorage.setItem('sinau_materi_url', CFG.materiUrl);
   closeConfig();
   toast('Konfigurasi disimpan! Memuat data...');
@@ -646,13 +687,16 @@ async function loadAll() {
 }
 
 // ── INIT ──
-if (!CFG.userId || !CFG.lbUrl) {
+if (!CFG.lbUrl) {
   renderNav('');
-  document.getElementById('materi-list').innerHTML = '<div class="loading" style="border:1.5px dashed #E5E7EB;border-radius:12px;padding:2rem;color:#6B7280;font-size:13px;">👋 Klik nama di pojok kanan atas untuk setup SINAU</div>';
-  document.getElementById('lb-list').innerHTML = '<div class="lb-empty">Setup dulu ya 👆</div>';
+  document.getElementById('materi-list').innerHTML = '<div class="loading" style="border:1.5px dashed #E5E7EB;border-radius:12px;padding:2rem;color:#6B7280;font-size:13px;">👋 Hubungi admin untuk setup SINAU</div>';
+  document.getElementById('lb-list').innerHTML = '<div class="lb-empty">Belum dikonfigurasi 👆</div>';
   setTimeout(showConfig, 600);
 } else {
   loadAll();
+  if (!CFG.userId) {
+    setTimeout(showLogin, 800);
+  }
 }
 </script>
 </body>
