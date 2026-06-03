@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SINAU — KPwBI Jember</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --hijau:     #0F6E56;
+  --hijau-mid: #1D9E75;
+  --hijau-lt:  #E1F5EE;
+  --hijau-pale:#F0FAF6;
+  --amber:     #BA7517;
+  --amber-lt:  #FAEEDA;
+  --biru:      #185FA5;
+  --biru-lt:   #E6F1FB;
+  --abu:       #6B7280;
+  --abu-lt:    #F3F4F6;
+  --border:    #E5E7EB;
+  --text:      #111827;
+  --text-2:    #6B7280;
+  --white:     #FFFFFF;
+  --radius:    12px;
+  --shadow:    0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #F8FAF9;
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── NAVBAR ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px;
+}
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.logo-box {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--hijau);
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-box svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.logo-text { line-height: 1.1; }
+.logo-text strong { font-size: 15px; font-weight: 700; color: var(--hijau); font-family: 'Fraunces', serif; }
+.logo-text small { font-size: 10px; color: var(--text-2); display: block; }
+.nav-links { display: flex; gap: 2px; }
+.nav-links a {
+  font-size: 13px; font-weight: 500; color: var(--text-2);
+  padding: 6px 14px; border-radius: 8px;
+  text-decoration: none; transition: all .15s;
+}
+.nav-links a:hover, .nav-links a.active { background: var(--hijau-lt); color: var(--hijau); }
+.nav-user { display: flex; align-items: center; gap: 8px; }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--hijau); color: #fff;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+#nav-name { font-size: 13px; font-weight: 500; color: var(--text); }
+
+/* ── HERO ── */
+.hero {
+  background: linear-gradient(135deg, var(--hijau) 0%, #0a4f3d 100%);
+  padding: 3rem 2rem 2.5rem;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: -60px; right: -60px;
+  width: 260px; height: 260px; border-radius: 50%;
+  background: rgba(255,255,255,.05);
+}
+.hero::after {
+  content: '';
+  position: absolute; bottom: -80px; left: 30%;
+  width: 180px; height: 180px; border-radius: 50%;
+  background: rgba(255,255,255,.04);
+}
+.hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.15); color: rgba(255,255,255,.9);
+  font-size: 11px; font-weight: 600; letter-spacing: .5px;
+  padding: 4px 12px; border-radius: 99px;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255,255,255,.2);
+}
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(28px, 5vw, 42px);
+  color: #fff; font-weight: 700;
+  line-height: 1.15; margin-bottom: .5rem;
+}
+.hero p { font-size: 14px; color: rgba(255,255,255,.75); margin-bottom: 2rem; }
+.hero-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+.stat-card {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: var(--radius);
+  padding: 14px 20px; min-width: 120px;
+  backdrop-filter: blur(8px);
+}
+.stat-card .num { font-size: 26px; font-weight: 700; color: #fff; font-family: 'Fraunces', serif; }
+.stat-card .lbl { font-size: 11px; color: rgba(255,255,255,.7); margin-top: 2px; }
+
+/* ── MAIN LAYOUT ── */
+.main { max-width: 960px; margin: 0 auto; padding: 2rem; display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; }
+@media (max-width: 720px) { .main { grid-template-columns: 1fr; } nav { padding: 0 1rem; } .hero { padding: 2rem 1rem; } }
+
+/* ── SECTION TITLE ── */
+.sec-title {
+  font-size: 13px; font-weight: 600; color: var(--text-2);
+  text-transform: uppercase; letter-spacing: .8px;
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 1rem;
+}
+.sec-title span { width: 18px; height: 18px; }
+
+/* ── MATERI CARDS ── */
+.materi-list { display: flex; flex-direction: column; gap: 10px; }
+.materi-card {
+  background: var(--white); border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 18px 20px;
+  transition: box-shadow .2s, border-color .2s;
+  cursor: pointer;
+}
+.materi-card:hover { box-shadow: var(--shadow); border-color: #C7DFDA; }
+.materi-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.tag {
+  font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 99px;
+  white-space: nowrap;
+}
+.tag-green { background: var(--hijau-lt); color: var(--hijau); }
+.tag-blue  { background: var(--biru-lt);  color: var(--biru);  }
+.tag-amber { background: var(--amber-lt); color: var(--amber); }
+.materi-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.materi-meta { font-size: 12px; color: var(--text-2); display: flex; gap: 12px; flex-wrap: wrap; }
+.materi-desc { font-size: 13px; color: var(--text-2); line-height: 1.55; margin: 10px 0; }
+.materi-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 12px; border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+.btn-kuis {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--hijau); color: #fff;
+  font-size: 12px; font-weight: 600;
+  padding: 7px 16px; border-radius: 8px;
+  text-decoration: none; border: none; cursor: pointer;
+  transition: background .15s;
+}
+.btn-kuis:hover { background: #0a5240; }
+.btn-kuis.done { background: var(--abu-lt); color: var(--abu); cursor: default; }
+.poin-info { font-size: 11px; color: var(--amber); font-weight: 600; background: var(--amber-lt); padding: 4px 10px; border-radius: 99px; }
+
+/* ── UPLOAD BTN ── */
+.btn-upload {
+  width: 100%; margin-top: 10px;
+  background: none; border: 1.5px dashed var(--border);
+  border-radius: var(--radius); padding: 14px;
+  font-size: 13px; font-weight: 500; color: var(--hijau);
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all .15s; font-family: inherit;
+}
+.btn-upload:hover { background: var(--hijau-lt); border-color: var(--hijau-mid); }
+
+/* ── SIDEBAR CARDS ── */
+.sidebar { display: flex; flex-direction: column; gap: 1.25rem; }
+.s-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 18px; }
+.s-card-title {
+  font-size: 13px; font-weight: 600; color: var(--text-2);
+  text-transform: uppercase; letter-spacing: .6px;
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 14px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── LEADERBOARD ── */
+.lb-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.lb-row:last-child { border-bottom: none; }
+.lb-rank { font-size: 16px; width: 24px; text-align: center; flex-shrink: 0; }
+.lb-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  font-size: 11px; font-weight: 700; color: #fff;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.lb-info { flex: 1; min-width: 0; }
+.lb-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-unit { font-size: 11px; color: var(--text-2); }
+.lb-poin { font-size: 14px; font-weight: 700; color: var(--hijau); flex-shrink: 0; }
+.lb-empty { font-size: 13px; color: var(--text-2); text-align: center; padding: 1rem 0; }
+
+/* ── PROGRESS ── */
+.prog-item { margin-bottom: 12px; }
+.prog-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+.prog-label span:first-child { color: var(--text-2); }
+.prog-label span:last-child { font-weight: 600; color: var(--text); }
+.prog-bar { height: 6px; background: var(--abu-lt); border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; background: var(--hijau-mid); border-radius: 99px; transition: width .6s ease; }
+.total-poin {
+  background: var(--hijau-lt); border-radius: 10px;
+  padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;
+  margin-top: 4px;
+}
+.total-poin .lbl { font-size: 12px; color: var(--hijau); font-weight: 500; }
+.total-poin .val { font-size: 22px; font-weight: 700; color: var(--hijau); font-family: 'Fraunces', serif; }
+
+/* ── SOP POIN ── */
+.sop-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.sop-row:last-child { border-bottom: none; }
+.sop-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+.sop-skor { color: var(--text-2); flex: 1; }
+.sop-poin { font-weight: 700; color: var(--hijau); }
+
+/* ── LOADING ── */
+.loading { text-align: center; padding: 2rem; color: var(--text-2); font-size: 13px; }
+.spinner {
+  width: 24px; height: 24px; border: 2px solid var(--border);
+  border-top-color: var(--hijau); border-radius: 50%;
+  animation: spin .7s linear infinite; margin: 0 auto 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 999;
+  background: var(--text); color: #fff;
+  padding: 10px 18px; border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  opacity: 0; transform: translateY(10px);
+  transition: all .25s; pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+
+/* ── MODAL CONFIG ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--white); border-radius: 16px;
+  padding: 28px; width: 90%; max-width: 460px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  transform: translateY(12px); transition: transform .2s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.modal p { font-size: 13px; color: var(--text-2); margin-bottom: 20px; line-height: 1.6; }
+.modal label { font-size: 12px; font-weight: 600; color: var(--text-2); display: block; margin-bottom: 5px; }
+.modal input {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 9px 12px; font-size: 13px; margin-bottom: 14px;
+  outline: none; font-family: inherit; transition: border-color .15s;
+}
+.modal input:focus { border-color: var(--hijau); }
+.modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+.btn-sec { font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: none; cursor: pointer; font-family: inherit; }
+.btn-pri { font-size: 13px; font-weight: 600; padding: 8px 18px; border-radius: 8px; border: none; background: var(--hijau); color: #fff; cursor: pointer; font-family: inherit; }
+
+/* ── FOOTER ── */
+footer {
+  text-align: center; padding: 2rem;
+  font-size: 12px; color: var(--text-2);
+  border-top: 1px solid var(--border);
+  margin-top: 2rem;
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="logo-box">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    </div>
+    <div class="logo-text">
+      <strong>SINAU</strong>
+      <small>KPwBI Jember</small>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="#beranda" class="active">Beranda</a>
+    <a href="#materi">Materi</a>
+    <a href="#leaderboard">Leaderboard</a>
+  </div>
+  <div class="nav-user">
+    <div class="avatar" id="nav-avatar" onclick="showConfig()">?</div>
+    <span id="nav-name" style="font-size:13px;font-weight:500;cursor:pointer" onclick="showConfig()">Belum login</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="beranda">
+  <div class="hero-inner">
+    <div class="hero-badge">✦ Platform Belajar Internal</div>
+    <h1>Sharing Ilmu,<br>Nambah wAwasan terpadU</h1>
+    <p>Belajar dari sesama pegawai · Ikut kuis · Kumpulkan poin · Raih peringkat</p>
+    <div class="hero-stats">
+      <div class="stat-card"><div class="num" id="stat-user">—</div><div class="lbl">Pengguna aktif</div></div>
+      <div class="stat-card"><div class="num" id="stat-materi">—</div><div class="lbl">Materi tersedia</div></div>
+      <div class="stat-card"><div class="num" id="stat-kuis">—</div><div class="lbl">Kuis diselesaikan</div></div>
+      <div class="stat-card"><div class="num" id="stat-poin">—</div><div class="lbl">Total poin terkumpul</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN -->
+<div class="main">
+  <div>
+    <!-- MATERI -->
+    <section id="materi">
+      <div class="sec-title">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="14" height="14" rx="2"/><path d="M6 6h6M6 9h6M6 12h4"/></svg>
+        Materi Terbaru
+      </div>
+      <div class="materi-list" id="materi-list">
+        <div class="loading"><div class="spinner"></div>Memuat materi...</div>
+      </div>
+      <button class="btn-upload" onclick="showUploadInfo()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload Materi Baru
+      </button>
+    </section>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- LEADERBOARD -->
+    <div class="s-card" id="leaderboard">
+      <div class="s-card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 21H16M12 17V21M17 3H7L5 9C5 12.3 8.1 15 12 15C15.9 15 19 12.3 19 9L17 3Z"/></svg>
+        Leaderboard
+      </div>
+      <div id="lb-list"><div class="lb-empty">Memuat data...</div></div>
+    </div>
+
+    <!-- PROGRES SAYA -->
+    <div class="s-card">
+      <div class="s-card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Progres Saya
+      </div>
+      <div id="my-progress">
+        <div class="lb-empty" style="font-size:12px;">
+          Klik nama kamu di pojok kanan atas untuk login
+        </div>
+      </div>
+    </div>
+
+    <!-- SOP POIN -->
+    <div class="s-card">
+      <div class="s-card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        SOP Poin
+      </div>
+      <div class="sop-row"><span class="sop-badge tag-green">SEMPURNA</span><span class="sop-skor">Skor = 100</span><span class="sop-poin">100 pts</span></div>
+      <div class="sop-row"><span class="sop-badge tag-blue">LULUS</span><span class="sop-skor">Skor 70–99</span><span class="sop-poin">70 pts</span></div>
+      <div class="sop-row"><span class="sop-badge" style="background:#FEE2E2;color:#991B1B;">BELUM</span><span class="sop-skor">Skor &lt; 70</span><span class="sop-poin">50 pts</span></div>
+      <div class="sop-row"><span class="sop-badge tag-amber">KONTRIBUSI</span><span class="sop-skor">Upload materi</span><span class="sop-poin">+30 pts</span></div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  SINAU · Sharing Ilmu, Nambah wAwasan terpadU · KPwBI Jember &copy; 2026
+</footer>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- MODAL KONFIGURASI (login user + sheets URL) -->
+<div class="modal-overlay" id="modal-config">
+  <div class="modal">
+    <h3>⚙️ Konfigurasi SINAU</h3>
+    <p>Masukkan ID User kamu dan URL Google Sheets SINAU yang sudah dipublish sebagai CSV. Pengaturan ini tersimpan di browser kamu.</p>
+    <label>ID User kamu (contoh: IK001)</label>
+    <input type="text" id="input-userid" placeholder="IK001" maxlength="10">
+    <label>URL Google Sheets — Tab LEADERBOARD (CSV)</label>
+    <input type="text" id="input-lb-url" placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv&gid=...">
+    <label>URL Google Sheets — Tab DATA_MATERI (CSV)</label>
+    <input type="text" id="input-materi-url" placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv&gid=...">
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="closeConfig()">Batal</button>
+      <button class="btn-pri" onclick="saveConfig()">Simpan & Muat Data</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG & STATE ──
+let CFG = {
+  userId:    localStorage.getItem('sinau_userid') || '',
+  lbUrl:     localStorage.getItem('sinau_lb_url') || '',
+  materiUrl: localStorage.getItem('sinau_materi_url') || '',
+};
+
+// Warna avatar
+const COLORS = ['#0F6E56','#185FA5','#854F0B','#6D2E46','#3B6D11','#993C1D'];
+function colorFor(str) { let h=0; for(let c of str) h=(h*31+c.charCodeAt(0))%COLORS.length; return COLORS[h]; }
+function initials(name) { return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
+
+// ── MODAL CONFIG ──
+function showConfig() {
+  document.getElementById('input-userid').value   = CFG.userId;
+  document.getElementById('input-lb-url').value   = CFG.lbUrl;
+  document.getElementById('input-materi-url').value = CFG.materiUrl;
+  document.getElementById('modal-config').classList.add('open');
+}
+function closeConfig() { document.getElementById('modal-config').classList.remove('open'); }
+function saveConfig() {
+  CFG.userId    = document.getElementById('input-userid').value.trim().toUpperCase();
+  CFG.lbUrl     = document.getElementById('input-lb-url').value.trim();
+  CFG.materiUrl = document.getElementById('input-materi-url').value.trim();
+  localStorage.setItem('sinau_userid',    CFG.userId);
+  localStorage.setItem('sinau_lb_url',    CFG.lbUrl);
+  localStorage.setItem('sinau_materi_url', CFG.materiUrl);
+  closeConfig();
+  toast('Konfigurasi disimpan! Memuat data...');
+  loadAll();
+}
+
+// ── TOAST ──
+function toast(msg, dur=3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+// ── PARSE CSV ──
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim());
+  return lines.slice(1).map(line => {
+    const vals = line.match(/(".*?"|[^,]+)(?=,|$)/g) || [];
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = (vals[i]||'').replace(/"/g,'').trim());
+    return obj;
+  });
+}
+
+// ── FETCH CSV ──
+async function fetchCSV(url) {
+  if (!url) return [];
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('gagal');
+    return parseCSV(await r.text());
+  } catch(e) {
+    return [];
+  }
+}
+
+// ── RENDER NAVBAR ──
+function renderNav(nama) {
+  const av = document.getElementById('nav-avatar');
+  const nm = document.getElementById('nav-name');
+  if (nama) {
+    av.textContent = initials(nama);
+    av.style.background = colorFor(nama);
+    nm.textContent = nama.split(' ')[0];
+  } else {
+    av.textContent = '?';
+    av.style.background = '#9CA3AF';
+    nm.textContent = 'Klik untuk login';
+  }
+}
+
+// ── RENDER LEADERBOARD ──
+function renderLB(rows) {
+  const el = document.getElementById('lb-list');
+  if (!rows.length) { el.innerHTML = '<div class="lb-empty">Belum ada data</div>'; return; }
+  const sorted = [...rows].sort((a,b) => Number(b['Total Poin']||b['TOTAL_POIN']||0) - Number(a['Total Poin']||a['TOTAL_POIN']||0));
+  const medals = ['🥇','🥈','🥉'];
+  el.innerHTML = sorted.slice(0,8).map((r,i) => {
+    const nama  = r['Nama']||r['NAMA']||'-';
+    const unit  = r['Unit']||r['UNIT']||'';
+    const poin  = r['Total Poin']||r['TOTAL_POIN']||0;
+    const bg    = colorFor(nama);
+    return `<div class="lb-row">
+      <span class="lb-rank">${medals[i]||i+1}</span>
+      <div class="lb-avatar" style="background:${bg}">${initials(nama)}</div>
+      <div class="lb-info"><div class="lb-name">${nama}</div><div class="lb-unit">${unit}</div></div>
+      <div class="lb-poin">${poin}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── RENDER MATERI ──
+function renderMateri(rows) {
+  const el = document.getElementById('materi-list');
+  if (!rows.length) {
+    el.innerHTML = '<div class="loading" style="border:1.5px dashed #E5E7EB;border-radius:12px;padding:2rem;">Belum ada materi. Jadilah yang pertama upload! 🎉</div>';
+    return;
+  }
+  const tagColors = {'UIKSPPSPPUR':'tag-green','UMKM & SP':'tag-blue'};
+  el.innerHTML = rows.map(r => {
+    const judul   = r['Judul Materi']||r['JUDUL']||'-';
+    const uploader= r['Uploader (ID)']||r['UPLOADER']||'-';
+    const unit    = r['Unit Kerja']||r['UNIT']||'';
+    const jenis   = r['Jenis File']||r['JENIS']||'';
+    const tgl     = r['Tgl Upload']||r['TGL']||'';
+    const linkFile= r['Link File (Drive)']||r['LINK_FILE']||'';
+    const linkKuis= r['Link Kuis (Form)']||r['LINK_KUIS']||'';
+    const tagCls  = tagColors[unit]||'tag-amber';
+    const hasKuis = linkKuis && !linkKuis.includes('forms.google.com/...');
+    const hasFile = linkFile && !linkFile.includes('drive.google.com/...');
+    return `<div class="materi-card">
+      <div class="materi-head">
+        <div>
+          <div class="materi-title">${judul}</div>
+          <div class="materi-meta">
+            <span>👤 ${uploader}</span>
+            ${tgl ? `<span>📅 ${tgl}</span>` : ''}
+            ${jenis ? `<span>📄 ${jenis}</span>` : ''}
+          </div>
+        </div>
+        <span class="tag ${tagCls}">${unit}</span>
+      </div>
+      <div class="materi-footer">
+        ${hasKuis
+          ? `<a class="btn-kuis" href="${linkKuis}" target="_blank">✏️ Ikut Kuis</a>`
+          : `<span class="btn-kuis done">Kuis belum tersedia</span>`}
+        ${hasFile
+          ? `<a href="${linkFile}" target="_blank" style="font-size:12px;color:var(--biru);text-decoration:none;font-weight:600;">📎 Lihat Materi</a>`
+          : ''}
+        <span class="poin-info">maks 100 pts</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── RENDER PROGRES ──
+function renderProgress(lbRows) {
+  const el = document.getElementById('my-progress');
+  if (!CFG.userId) {
+    el.innerHTML = '<div class="lb-empty" style="font-size:12px;">Klik nama di pojok kanan atas untuk login</div>';
+    return;
+  }
+  const me = lbRows.find(r => (r['ID User']||r['ID_USER']||'').toUpperCase() === CFG.userId);
+  if (!me) { el.innerHTML = '<div class="lb-empty" style="font-size:12px;">User tidak ditemukan. Cek ID kamu.</div>'; return; }
+
+  const nama       = me['Nama']||me['NAMA']||CFG.userId;
+  const poinKuis   = Number(me['Poin Kuis']||me['POIN_KUIS']||0);
+  const poinKontrib= Number(me['Poin Kontrib.']||me['POIN_KONTRIB']||0);
+  const totalPoin  = Number(me['Total Poin']||me['TOTAL_POIN']||0);
+  const kuisIkut   = Number(me['Kuis Diikuti']||me['KUIS_DIIKUTI']||0);
+  const materiUp   = Number(me['Materi Upload']||me['MATERI_UPLOAD']||0);
+
+  renderNav(nama);
+
+  const maxPoin = Math.max(totalPoin, 100);
+  el.innerHTML = `
+    <div class="total-poin"><span class="lbl">⭐ Total Poin</span><span class="val">${totalPoin}</span></div>
+    <div style="height:12px"></div>
+    <div class="prog-item">
+      <div class="prog-label"><span>Poin dari kuis</span><span>${poinKuis} pts</span></div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${Math.min(poinKuis/maxPoin*100,100)}%"></div></div>
+    </div>
+    <div class="prog-item">
+      <div class="prog-label"><span>Poin kontribusi</span><span>${poinKontrib} pts</span></div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${Math.min(poinKontrib/maxPoin*100,100)}%;background:#BA7517"></div></div>
+    </div>
+    <div class="prog-item">
+      <div class="prog-label"><span>Kuis diselesaikan</span><span>${kuisIkut} kuis</span></div>
+    </div>
+    <div class="prog-item">
+      <div class="prog-label"><span>Materi diupload</span><span>${materiUp} materi</span></div>
+    </div>`;
+}
+
+// ── RENDER STATS HERO ──
+function renderStats(lbRows, materiRows) {
+  const totalPoin = lbRows.reduce((s,r)=>s+Number(r['Total Poin']||r['TOTAL_POIN']||0),0);
+  const kuisTotal = lbRows.reduce((s,r)=>s+Number(r['Kuis Diikuti']||r['KUIS_DIIKUTI']||0),0);
+  document.getElementById('stat-user').textContent   = lbRows.length || '—';
+  document.getElementById('stat-materi').textContent = materiRows.length || '—';
+  document.getElementById('stat-kuis').textContent   = kuisTotal || '—';
+  document.getElementById('stat-poin').textContent   = totalPoin || '—';
+}
+
+// ── UPLOAD INFO ──
+function showUploadInfo() {
+  toast('Upload materi: simpan file ke Google Drive → salin link → isi di tab DATA_MATERI di Google Sheets SINAU', 5000);
+}
+
+// ── LOAD ALL ──
+async function loadAll() {
+  if (!CFG.lbUrl && !CFG.materiUrl) {
+    showConfig();
+    return;
+  }
+  const [lbRows, materiRows] = await Promise.all([
+    fetchCSV(CFG.lbUrl),
+    fetchCSV(CFG.materiUrl),
+  ]);
+  renderLB(lbRows);
+  renderMateri(materiRows);
+  renderStats(lbRows, materiRows);
+  renderProgress(lbRows);
+  if (CFG.userId) {
+    const me = lbRows.find(r=>(r['ID User']||r['ID_USER']||'').toUpperCase()===CFG.userId);
+    if (me) renderNav(me['Nama']||me['NAMA']||CFG.userId);
+  }
+}
+
+// ── INIT ──
+if (!CFG.userId || !CFG.lbUrl) {
+  renderNav('');
+  document.getElementById('materi-list').innerHTML = '<div class="loading" style="border:1.5px dashed #E5E7EB;border-radius:12px;padding:2rem;color:#6B7280;font-size:13px;">👋 Klik nama di pojok kanan atas untuk setup SINAU</div>';
+  document.getElementById('lb-list').innerHTML = '<div class="lb-empty">Setup dulu ya 👆</div>';
+  setTimeout(showConfig, 600);
+} else {
+  loadAll();
+}
+</script>
+</body>
+</html>
