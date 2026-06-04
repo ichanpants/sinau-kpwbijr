@@ -583,22 +583,19 @@ function parseCSV(text) {
 }
 
 // ── FETCH CSV ──
+const PROXY = 'https://script.google.com/macros/s/AKfycbwPZOeapQtZyYgDrl2xF-KzniN3q6Y9UCKA2xfOQgvO_6YmeVnT12TKoQxS0NX-F993bg/exec';
 async function fetchCSV(url) {
   if (!url) return [];
-  const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
   try {
-    const r = await fetch(proxy);
-    if (!r.ok) throw new Error();
+    const r = await fetch(`${PROXY}?url=${encodeURIComponent(url)}`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const text = await r.text();
     if (text && text.includes(',') && text.length > 20) return parseCSV(text);
-  } catch(e) {}
-  try {
-    const r2 = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
-    if (!r2.ok) throw new Error();
-    const text2 = await r2.text();
-    if (text2 && text2.includes(',') && text2.length > 20) return parseCSV(text2);
-  } catch(e) {}
-  return [];
+    throw new Error('empty');
+  } catch(e) {
+    console.warn('Proxy error:', e.message);
+    return [];
+  }
 }
 
 // ── RENDER NAVBAR ──
