@@ -272,7 +272,54 @@ nav {
 .modal input:focus { border-color: var(--hijau); }
 .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
 .btn-sec { font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: none; cursor: pointer; font-family: inherit; }
-.btn-pri { font-size: 13px; font-weight: 600; padding: 8px 18px; border-radius: 8px; border: none; background: var(--hijau); color: #fff; cursor: pointer; font-family: inherit; }
+.btn-pri {
+  font-size: 13px; font-weight: 600; padding: 8px 18px; border-radius: 8px;
+  border: none; background: var(--hijau); color: #fff; cursor: pointer;
+  font-family: inherit; display: inline-flex; align-items: center; gap: 8px;
+  transition: background .15s, opacity .15s;
+  min-width: 100px; justify-content: center;
+}
+.btn-pri:disabled { opacity: .7; cursor: not-allowed; }
+
+/* ── LOGIN BUTTON SPINNER ── */
+.btn-spinner {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── SUCCESS STATE (modal) ── */
+.modal.success {
+  background: var(--hijau);
+  transition: background .3s;
+}
+.modal.success h3,
+.modal.success p,
+.modal.success label { color: #fff; }
+.modal.success input { opacity: 0; }
+.modal.success .modal-footer { opacity: 0; }
+
+/* ── SUCCESS CHECKMARK ── */
+.success-check {
+  display: none;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; padding: 10px 0;
+  animation: popIn .35s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+@keyframes popIn {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.check-circle {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: rgba(255,255,255,.25);
+  display: flex; align-items: center; justify-content: center;
+}
+.check-circle svg { width: 28px; height: 28px; stroke: #fff; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.check-label { font-size: 15px; font-weight: 700; color: #fff; }
 
 /* ── FOOTER ── */
 footer {
@@ -388,23 +435,27 @@ footer {
 <!-- TOAST -->
 <div id="toast"></div>
 
-<!-- MODAL KONFIGURASI (login user + sheets URL) -->
 <!-- MODAL LOGIN USER -->
 <div class="modal-overlay" id="modal-login">
-  <div class="modal">
-    <h3>👋 Masuk ke SINAU</h3>
-    <p>Masukkan NIP kamu untuk mulai belajar dan melihat progres kamu.</p>
-    <label>NIP kamu</label>
-    <input type="text" id="input-nip" placeholder="contoh: 17241" maxlength="10" style="font-size:18px;font-weight:600;letter-spacing:2px;">
+  <div class="modal" id="modal-box">
+    <h3 id="modal-title">👋 Masuk ke SINAU</h3>
+    <p id="modal-desc">Masukkan NIP kamu untuk mulai belajar dan melihat progres kamu.</p>
+    <label id="modal-label">NIP kamu</label>
+    <input type="text" id="input-nip" placeholder="contoh: 17241" maxlength="10" style="font-size:18px;font-weight:600;letter-spacing:2px;" onkeydown="if(event.key==='Enter') doLogin()">
     <div id="login-error" style="font-size:12px;color:#DC2626;margin-top:-10px;margin-bottom:10px;display:none;">NIP tidak ditemukan. Hubungi admin.</div>
-    <div class="modal-footer">
+    <!-- Success checkmark (hidden by default) -->
+    <div class="success-check" id="success-check">
+      <div class="check-circle">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="check-label" id="success-label">Selamat datang!</div>
+    </div>
+    <div class="modal-footer" id="modal-footer">
       <button class="btn-sec" onclick="closeLogin()">Batal</button>
-      <button class="btn-pri" onclick="doLogin()">Masuk →</button>
+      <button class="btn-pri" id="btn-masuk" onclick="doLogin()">Masuk →</button>
     </div>
   </div>
 </div>
-
-
 
 <script>
 // ── CONFIG & STATE ──
@@ -414,39 +465,92 @@ let CFG = {
   materiUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5jH8H8qKrnODO7fPnJxNvA1yFAWGJO3yQkzI9ktgRneCgnSEy8iK3tCM0pyRYmw/pub?gid=435179716&single=true&output=csv',
 };
 
-// Warna avatar
 const COLORS = ['#0F6E56','#185FA5','#854F0B','#6D2E46','#3B6D11','#993C1D'];
 function colorFor(str) { let h=0; for(let c of str) h=(h*31+c.charCodeAt(0))%COLORS.length; return COLORS[h]; }
 function initials(name) { return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
 
-// ── MODAL CONFIG ──
 // ── MODAL LOGIN ──
 function showLogin() {
-  document.getElementById('input-nip').value = '';
+  const input = document.getElementById('input-nip');
+  input.value = '';
   document.getElementById('login-error').style.display = 'none';
+  // Reset state kalau sebelumnya sukses
+  resetLoginModal();
   document.getElementById('modal-login').classList.add('open');
+  setTimeout(() => input.focus(), 250);
 }
-function closeLogin() { document.getElementById('modal-login').classList.remove('open'); }
+
+function closeLogin() {
+  document.getElementById('modal-login').classList.remove('open');
+  setTimeout(resetLoginModal, 300);
+}
+
+function resetLoginModal() {
+  const box = document.getElementById('modal-box');
+  box.classList.remove('success');
+  document.getElementById('modal-title').style.display = '';
+  document.getElementById('modal-desc').style.display = '';
+  document.getElementById('modal-label').style.display = '';
+  document.getElementById('input-nip').style.display = '';
+  document.getElementById('modal-footer').style.display = '';
+  document.getElementById('success-check').style.display = 'none';
+  const btn = document.getElementById('btn-masuk');
+  btn.disabled = false;
+  btn.innerHTML = 'Masuk →';
+}
+
 async function doLogin() {
   const nip = document.getElementById('input-nip').value.trim();
-  if (!nip) return;
-  // Cek apakah NIP ada di leaderboard
+  if (!nip) { document.getElementById('input-nip').focus(); return; }
+
+  // Set loading state
+  const btn = document.getElementById('btn-masuk');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-spinner"></span> Memeriksa...';
+  document.getElementById('login-error').style.display = 'none';
+
   const rows = await fetchCSV(CFG.lbUrl);
   const found = rows.find(r => (getCol(r,'ID User','ID_USER')||'').toString().trim() === nip);
+
   if (!found) {
+    // Error state
+    btn.disabled = false;
+    btn.innerHTML = 'Masuk →';
     document.getElementById('login-error').style.display = 'block';
+    document.getElementById('input-nip').focus();
     return;
   }
+
+  // ── SUCCESS ANIMATION ──
+  const nama = getCol(found,'Nama','NAMA') || nip;
+
+  // Sembunyikan elemen form
+  document.getElementById('modal-title').style.display = 'none';
+  document.getElementById('modal-desc').style.display = 'none';
+  document.getElementById('modal-label').style.display = 'none';
+  document.getElementById('input-nip').style.display = 'none';
+  document.getElementById('modal-footer').style.display = 'none';
+  document.getElementById('login-error').style.display = 'none';
+
+  // Tampilkan checkmark
+  const checkEl = document.getElementById('success-check');
+  document.getElementById('success-label').textContent = 'Halo, ' + nama.split(' ')[0] + '! 👋';
+  checkEl.style.display = 'flex';
+
+  // Warnai modal jadi hijau
+  document.getElementById('modal-box').classList.add('success');
+
+  // Simpan & tutup setelah 1.4 detik
   CFG.userId = nip;
   localStorage.setItem('sinau_userid', nip);
-  closeLogin();
-  toast('Selamat datang, ' + (getCol(found,'Nama','NAMA')||nip) + '! 👋');
-  renderProgress(rows);
-  const nama = getCol(found,'Nama','NAMA')||nip;
-  renderNav(nama);
+
+  setTimeout(() => {
+    closeLogin();
+    toast('Selamat datang, ' + nama.split(' ')[0] + '! 👋');
+    renderProgress(rows);
+    renderNav(nama);
+  }, 1400);
 }
-
-
 
 // ── TOAST ──
 function toast(msg, dur=3000) {
@@ -539,7 +643,6 @@ function renderLB(rows) {
 // ── RENDER MATERI ──
 function renderMateri(rows) {
   const el = document.getElementById('materi-list');
-  // Filter baris kosong
   const validRows = rows.filter(r => {
     const vals = Object.values(r);
     return vals.some(v => v && v.trim() && v !== '-');
@@ -550,20 +653,16 @@ function renderMateri(rows) {
   }
   const tagColors = {'UIKSP':'tag-green','UPUR':'tag-blue','UIKSPPSPPUR':'tag-green','UMKM & SP':'tag-blue'};
   el.innerHTML = validRows.map(r => {
-    // Baca by nama kolom dengan fallback ke index (posisi)
     const vals = Object.values(r);
     const keys = Object.keys(r);
     const get = (...names) => {
       for (const n of names) {
-        // Coba exact match
         if (r[n] !== undefined && r[n].trim()) return r[n].trim();
-        // Coba case-insensitive & trim
         const k = keys.find(k => k.trim().toLowerCase() === n.toLowerCase());
         if (k && r[k] && r[k].trim()) return r[k].trim();
       }
       return '';
     };
-    // Fallback ke index kalau nama kolom tidak ketemu
     const judul    = get('Judul Materi','JUDUL','judul materi') || vals[1] || '-';
     const uploader = get('Uploader (ID)','UPLOADER','uploader') || vals[3] || '-';
     const unit     = get('Unit Kerja','UNIT','unit kerja') || vals[4] || '';
