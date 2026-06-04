@@ -131,6 +131,28 @@ nav {
 
 /* ── MATERI CARDS ── */
 .materi-list { display: flex; flex-direction: column; gap: 10px; }
+.materi-thumb {
+  width: 100%; height: 160px; border-radius: 8px;
+  object-fit: cover; margin-bottom: 12px;
+  background: var(--abu-lt);
+  border: 1px solid var(--border);
+}
+.materi-thumb-wrap {
+  position: relative; width: 100%; height: 160px;
+  border-radius: 8px; overflow: hidden; margin-bottom: 12px;
+  background: linear-gradient(135deg, #E1F5EE 0%, #DCE6F1 100%);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+}
+.materi-thumb-wrap iframe {
+  width: 100%; height: 100%; border: none; pointer-events: none;
+}
+.materi-thumb-wrap .thumb-fallback {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: var(--abu);
+}
+.materi-thumb-wrap .thumb-fallback svg { opacity: .4; }
+.materi-thumb-wrap .thumb-fallback span { font-size: 12px; color: var(--text-2); font-weight: 500; }
 .materi-card {
   background: var(--white); border-radius: var(--radius);
   border: 1px solid var(--border);
@@ -181,6 +203,11 @@ nav {
 /* ── SIDEBAR CARDS ── */
 .sidebar { display: flex; flex-direction: column; gap: 1.25rem; }
 .s-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 18px; }
+#leaderboard { padding-bottom: 0; }
+#lb-list { max-height: 420px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+#lb-list::-webkit-scrollbar { width: 4px; }
+#lb-list::-webkit-scrollbar-track { background: transparent; }
+#lb-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 .s-card-title {
   font-size: 13px; font-weight: 600; color: var(--text-2);
   text-transform: uppercase; letter-spacing: .6px;
@@ -629,7 +656,7 @@ function renderLB(rows) {
   if (!rows.length) { el.innerHTML = '<div class="lb-empty">Belum ada data</div>'; return; }
   const sorted = [...rows].sort((a,b) => Number(getCol(b,'Total Poin','TOTAL_POIN')||0) - Number(getCol(a,'Total Poin','TOTAL_POIN')||0));
   const medals = ['🥇','🥈','🥉'];
-  el.innerHTML = sorted.slice(0,8).map((r,i) => {
+  el.innerHTML = sorted.map((r,i) => {
     const nama  = getCol(r,'Nama','NAMA') || '-';
     const unit  = getCol(r,'Unit','UNIT') || '';
     const poin  = getCol(r,'Total Poin','TOTAL_POIN') || 0;
@@ -665,6 +692,13 @@ function renderMateri(rows) {
       }
       return '';
     };
+    // Ekstrak FILE_ID dari Google Drive URL untuk thumbnail
+    const getDriveThumb = (url) => {
+      if (!url) return '';
+      const m = url.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
+      if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w600`;
+      return '';
+    };
     const judul    = find('judul') || '-';
     const uploader = find('uploader') || '-';
     const unit     = find('unit') || '';
@@ -675,7 +709,24 @@ function renderMateri(rows) {
     const tagCls   = tagColors[unit] || 'tag-amber';
     const hasKuis  = linkKuis && linkKuis.startsWith('http');
     const hasFile  = linkFile && linkFile.startsWith('http');
+    const thumbUrl = getDriveThumb(linkFile);
+    const jenisBadge = {'PDF':'📄','PPT':'📊','PPTX':'📊','VIDEO':'🎬','DOC':'📝','DOCX':'📝','LINK':'🔗'};
+    const jenisIcon = jenisBadge[(jenis||'').toUpperCase()] || '📄';
     return `<div class="materi-card">
+      <div class="materi-thumb-wrap">
+        ${thumbUrl
+          ? `<img src="${thumbUrl}" class="materi-thumb"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+               style="width:100%;height:160px;object-fit:cover;border:none;">
+             <div class="thumb-fallback" style="display:none;">
+               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+               <span>${jenisIcon} ${jenis || 'Dokumen'}</span>
+             </div>`
+          : `<div class="thumb-fallback">
+               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+               <span>${jenisIcon} ${jenis || 'Dokumen'}</span>
+             </div>`}
+      </div>
       <div class="materi-head">
         <div>
           <div class="materi-title">${judul}</div>
