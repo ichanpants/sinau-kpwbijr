@@ -564,20 +564,26 @@ function toast(msg, dur=3000) {
 function parseCSV(text) {
   const lines = text.trim().split('\n');
   let headerIdx = 0;
-  for (let i = 0; i < Math.min(5, lines.length); i++) {
+  const HEADER_KEYWORDS = ['id','nama','ranking','unit','poin','kuis','materi','judul','uploader','link','file','tgl','jabatan','jenis'];
+  for (let i = 0; i < Math.min(6, lines.length); i++) {
     const cols = lines[i].split(',').map(h => h.replace(/"/g,'').trim());
-    const hasRealHeader = cols.some(c =>
-      ['id','nama','ranking','unit','poin','kuis','materi','judul','uploader'].some(k =>
-        c.toLowerCase().includes(k)
-      )
-    );
-    if (hasRealHeader) { headerIdx = i; break; }
+    // Baris header punya banyak kolom dan mayoritas cocok keyword
+    const matchCount = cols.filter(c =>
+      HEADER_KEYWORDS.some(k => c.toLowerCase().includes(k))
+    ).length;
+    if (matchCount >= 2) { headerIdx = i; break; }
   }
   const headers = lines[headerIdx].split(',').map(h => h.replace(/"/g,'').trim());
   return lines.slice(headerIdx + 1).filter(l => l.trim()).map(line => {
-    const vals = line.match(/(".*?"|[^,]+)(?=,|$)/g) || [];
+    const vals = [];
+    let cur = '', inQ = false;
+    for (const ch of line + ',') {
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
     const obj = {};
-    headers.forEach((h,i) => obj[h] = (vals[i]||'').replace(/"/g,'').trim());
+    headers.forEach((h,i) => obj[h] = (vals[i]||'').replace(/^"|"$/g,'').trim());
     return obj;
   });
 }
@@ -648,28 +654,27 @@ function renderMateri(rows) {
     el.innerHTML = '<div class="loading" style="border:1.5px dashed #E5E7EB;border-radius:12px;padding:2rem;">Belum ada materi. Jadilah yang pertama upload! 🎉</div>';
     return;
   }
-  const tagColors = {'UIKSP':'tag-green','UPUR':'tag-blue','UIKSPPSPPUR':'tag-green','UMKM & SP':'tag-blue'};
+  const tagColors = {'UIKSP':'tag-green','UPUR':'tag-blue','UIKSPPSPPUR':'tag-green','UMKM & SP':'tag-blue','UMI':'tag-amber','SK':'tag-amber','FDSEK':'tag-blue','FPPUKIS':'tag-green'};
   el.innerHTML = validRows.map(r => {
-    const vals = Object.values(r);
     const keys = Object.keys(r);
-    const get = (...names) => {
-      for (const n of names) {
-        if (r[n] !== undefined && r[n].trim()) return r[n].trim();
-        const k = keys.find(k => k.trim().toLowerCase() === n.toLowerCase());
+    // Cari kolom pakai partial match, case-insensitive
+    const find = (...needles) => {
+      for (const needle of needles) {
+        const k = keys.find(k => k.toLowerCase().includes(needle.toLowerCase()));
         if (k && r[k] && r[k].trim()) return r[k].trim();
       }
       return '';
     };
-    const judul    = get('Judul Materi','JUDUL','judul materi') || vals[1] || '-';
-    const uploader = get('Uploader (ID)','UPLOADER','uploader') || vals[3] || '-';
-    const unit     = get('Unit Kerja','UNIT','unit kerja') || vals[4] || '';
-    const jenis    = get('Jenis File','JENIS','jenis file') || vals[5] || '';
-    const linkFile = get('Link File (Drive)','LINK_FILE','link file') || vals[6] || '';
-    const linkKuis = get('Link Kuis (Form)','LINK_KUIS','link kuis') || vals[7] || '';
-    const tgl      = get('Tgl Upload','TGL','tgl upload') || vals[8] || '';
+    const judul    = find('judul') || '-';
+    const uploader = find('uploader') || '-';
+    const unit     = find('unit') || '';
+    const jenis    = find('jenis') || '';
+    const linkFile = find('drive','link file') || find('file') || '';
+    const linkKuis = find('form','link kuis') || '';
+    const tgl      = find('tgl') || '';
     const tagCls   = tagColors[unit] || 'tag-amber';
-    const hasKuis  = linkKuis && linkKuis.startsWith('http') && !linkKuis.includes('...');
-    const hasFile  = linkFile && linkFile.startsWith('http') && !linkFile.includes('...');
+    const hasKuis  = linkKuis && linkKuis.startsWith('http');
+    const hasFile  = linkFile && linkFile.startsWith('http');
     return `<div class="materi-card">
       <div class="materi-head">
         <div>
